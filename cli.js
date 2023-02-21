@@ -1,5 +1,6 @@
 const client = require('./client');
-const dasSchema = require('./das_program_schema');
+// const dasSchema = require('./das_program_schema');
+const dasSchema = require('./das_program_schema_with_smi');
 const fs = require('fs');
 
 const DAS_COLLECTION_NAME = 'das_programs';
@@ -7,10 +8,9 @@ const DAS_COLLECTION_NAME = 'das_programs';
 const collectionExists = async (name) => {
     const collections = await client.listCollections();
     return collections.some((collection) => collection.name === name);
-
 }
 
-const main = async (schema) => {
+const main = async (schema, year) => {
     const hasCollection = await collectionExists(DAS_COLLECTION_NAME);
     if(!hasCollection){
         console.log('making new collection:', DAS_COLLECTION_NAME);
@@ -23,12 +23,22 @@ const main = async (schema) => {
     }
     const {
         importDocuments,
+        importDocumentsByLines,
         getDocument,
         searchDocuments,
         dropCollection,
     } = client.getCollection(DAS_COLLECTION_NAME);
     // const result = await dropCollection();
-    const result = await importDocuments('program_2022.del', DAS_COLLECTION_NAME)
+
+    if(year){
+        await importDocumentsByLines(`program_${year}.del.with_smi`, 1000)
+    } else {
+        for(i=2008;i < 2015;i++){
+            console.log(`processing....${i}..${new Date()}`)
+            await importDocuments(`program_${i}.del.with_smi`)
+        }
+    }
+
     // console.log(result1)
     // const searchParams = {
     //     "query_by":"PGMNM_TITLE, PGM_NM, TITLE, SNPS, DRT_NM, WRITER_NM, CAST_NM, SUB_TTL",
@@ -42,11 +52,13 @@ const main = async (schema) => {
     //     "per_page":8
     // }
     // const result = await searchDocuments(searchParams);
-    console.log(result);
-
 }
 
-main(dasSchema)
+const year = process.argv[2];
+console.log('######################################');
+console.log('indxing', year);
+console.log('######################################');
+main(dasSchema, year);
 
 // const showInstruction = () => {
 //     console.log(`#######################################`)

@@ -1,17 +1,26 @@
 require('@babel/register');
 const Typesense = require('typesense');
 
-const createConnection = () => {
-    const typesense = new Typesense.Client({
-        nodes: [
+const DEFAULT_HOST = '10.10.16.122'
+const DEFAULT_PORT = '8108'
+const DEFAULT_PROTO = 'http'
+const DEFAULT_APIKEY ='XrS5t2LD1vPiIzjfgnYBLDBs94kBzcL9pFIXNyG0G6cyf1d0'
+
+const createConnection = (params) => {
+    const {
+        conn = [
             {
-                host: '10.10.16.122',
-                port: '8108',
-                protocol: 'http'
+                host: DEFAULT_HOST,
+                port: DEFAULT_PORT,
+                protocol: DEFAULT_PROTO
             }
         ],
+        apiKey = DEFAULT_APIKEY
+    } = params
+    const typesense = new Typesense.Client({
+        nodes: conn,
         numRetries: 10,
-        apiKey: 'XrS5t2LD1vPiIzjfgnYBLDBs94kBzcL9pFIXNyG0G6cyf1d0',
+        apiKey,
         connectionTimeoutSeconds: 10,
         retryIntervalSeconds: 0.1,
         healthcheckIntervalSeconds: 2,
