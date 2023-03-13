@@ -36,8 +36,16 @@ const getCollection = (collectionName) => {
         return client.collections(collectionName).documents().import(jsonl);
     }
     const importDocumentsByLines = (fname, numOfLines) => {
-        readByLines(fname, numOfLines, (lines) => {
-            return client.collections(collectionName).documents().import(lines);
+        readByLines(fname, numOfLines, async (lines) => {
+            try {
+                const result = await client.collections(collectionName).documents().import(lines);
+                if(result.success !== true){
+                    console.log(result.error)
+                }
+                console.log(result)
+            } catch(err) {
+                console.error(err)
+            }
         })
     }
 
