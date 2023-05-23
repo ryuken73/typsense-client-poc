@@ -1,19 +1,26 @@
 const client = require('./client');
-const schema = require('./nrs_info_schema');
+const schemaInfo = require('./nrs_info_schema');
+const schemaYonhap = require('./nrs_yonhap_schema');
 const fs = require('fs');
 
-const COLLECTION_NAME = schema.name
+const schemas = {
+    'nrs_info_surface': schemaInfo,
+    'nrs_yonhap_surface': schemaYonhap,
+}
 
 const collectionExists = async (name) => {
     const collections = await client.listCollections();
+    console.log(name, collections)
     return collections.some((collection) => collection.name === name);
 }
 
 const main = async (schema, fname) => {
-    const hasCollection = await collectionExists(COLLECTION_NAME);
+    const collectionName = schema.name;
+    const hasCollection = await collectionExists(collectionName);
     if(!hasCollection){
-        console.log('making new collection:', COLLECTION_NAME);
+        console.log('making new collection:', collectionName);
         try {
+            schema.name = collectionName;
             const result = await client.createCollection(schema);
             console.log(result);
         } catch(err) { 
@@ -26,7 +33,7 @@ const main = async (schema, fname) => {
         getDocument,
         searchDocuments,
         dropCollection,
-    } = client.getCollection(COLLECTION_NAME);
+    } = client.getCollection(collectionName);
     // const result = await dropCollection();
 
     try {
@@ -52,9 +59,11 @@ const main = async (schema, fname) => {
 }
 
 const fname = process.argv[2];
+const collectionName = process.argv[3];
 console.log('######################################');
-console.log('indxing', fname);
+console.log('indxing', fname, collectionName);
 console.log('######################################');
+const schema = schemas[collectionName]
 main(schema, fname);
 
 // const showInstruction = () => {

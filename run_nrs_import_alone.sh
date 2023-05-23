@@ -1,0 +1,4 @@
+FILE=$1
+COLLECTION_NAME=$2
+node cli_nrs.js ${FILE} ${COLLECTION_NAME}
+
